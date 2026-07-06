@@ -54,7 +54,7 @@ claude -p "回复OK"
 | [Dockerfile](Dockerfile) | Docker 镜像构建文件 |
 | [docker-compose.yml](docker-compose.yml) | Docker Compose 一键启动 |
 | [.env.example](.env.example) | Docker 环境变量模板 |
-| [SKILL.md](SKILL.md) | WispTerm AI 技能定义 |
+| [SKILL.md](SKILL.md) | 终端 AI Agent 技能定义 |
 | [完全指南.md](完全指南.md) | 13 章完整教程，每步命令可复制 |
 | README.md (本文件) | 快速参考 |
 | [Claude_Code_从零到精通_完全指南.docx](Claude_Code_从零到精通_完全指南.docx) | Word 文档，可打印版 |
