@@ -1,6 +1,6 @@
 ---
 name: claude-test
-description: Claude Code 从零安装、配置与使用。涵盖 nvm/Node.js 安装、Claude Code 部署、MiniMax API 认证、settings.json 三层配置、模型选择策略、权限模式、CLAUDE.md 记忆文件、IDE 集成、命令速查、四个实战工作流、FAQ 故障排查。
+description: Claude Code 从零安装、配置与使用。涵盖 nvm/Node.js 安装、Claude Code 部署、MiniMax/Anthropic API 认证、settings.json 三层配置、模型选择策略、权限模式、CLAUDE.md 记忆文件、IDE 集成、命令速查、四个实战工作流、FAQ 故障排查。
 ---
 
 # Claude Code 安装配置完全指南
@@ -14,6 +14,8 @@ description: Claude Code 从零安装、配置与使用。涵盖 nvm/Node.js 安
 | **SKILL.md** (本文件) | AI 技能定义，供 WispTerm Agent 加载使用 |
 | [README.md](README.md) | 快速参考卡片，30 秒速查 |
 | [完全指南.md](完全指南.md) | 面向零基础小白的 13 章完整教程 |
+| [Claude_Code_从零到精通_完全指南.docx](Claude_Code_从零到精通_完全指南.docx) | Word 文档，可打印版 |
+| [Claude_Code_从零到精通_完全指南.pptx](Claude_Code_从零到精通_完全指南.pptx) | PPT 幻灯片，适合演示 |
 
 ---
 
@@ -27,6 +29,19 @@ description: Claude Code 从零安装、配置与使用。涵盖 nvm/Node.js 安
 4. **参数调优** — settings.json 三层配置、模型选择、权限模式
 5. **实战使用** — 四个典型工作流
 6. **故障排查** — 10 个 FAQ
+
+---
+
+## 🚨 致组学小白：为什么需要配置 CLAUDE.md？
+
+> ⚠️ **重要提示**：CLAUDE.md 是 Claude Code 的"记忆系统"。如果不配置 CLAUDE.md，Claude 将不了解你的：
+> - 工作背景（生物信息学？单细胞？）
+> - 工具偏好（STARsolo? dnbc4tools? Seurat?）
+> - 编码规范（Python uv？R renv？）
+>
+> **没有 CLAUDE.md，Claude 回复质量会明显下降，就像让一个陌生人帮你写代码！**
+>
+> 👉 请务必阅读第 8 步并创建 CLAUDE.md，只需 5 分钟。
 
 ---
 
@@ -46,7 +61,6 @@ nvm --version
 
 ```bash
 brew install nvm
-# 然后在 ~/.zshrc 中添加：
 export NVM_DIR="$HOME/.nvm"
 [ -s "$(brew --prefix)/opt/nvm/nvm.sh" ] && \. "$(brew --prefix)/opt/nvm/nvm.sh"
 source ~/.zshrc
@@ -132,6 +146,8 @@ echo "sk-ant-xxxxx" | claude-keys store
 
 ### 3.3 MiniMax 第三方 API（国内用户首选）
 
+> ⚠️ **开始前必读**：不同 MiniMax 环境使用不同的 API 地址和认证字段。若下述配置不生效，请先阅读 [3.4 节 API 变体说明](#34-️-minimax-api-地址与认证字段变体说明)。
+
 ```bash
 cat > ~/.claude/settings.json << 'EOF'
 {
@@ -151,7 +167,22 @@ cat > ~/.claude/settings.json << 'EOF'
 EOF
 ```
 
-### 3.4 验证认证
+> 🔑 **如何获取 MiniMax API Key？**  
+> 访问 https://platform.minimax.chat 注册账号 → 控制台 → API Keys → 创建密钥。
+
+### 3.4 ⚠️ MiniMax API 地址与认证字段变体说明
+
+> **重要**：不同 MiniMax 平台环境可能使用不同的 API 地址和认证字段名：
+>
+> | 使用场景 | API 地址 | 认证字段名 |
+> |----------|----------|------------|
+> | MiniMax 海外版 | `https://api.minimax.chat/anthropic` | `ANTHROPIC_API_KEY` |
+> | MiniMax 国内版 | `https://api.minimaxi.com/anthropic` | `ANTHROPIC_AUTH_TOKEN` |
+>
+> **如果 `ANTHROPIC_API_KEY` 认证失败，请尝试改成 `ANTHROPIC_AUTH_TOKEN`。**
+> **请以 MiniMax 平台的最新文档为准**，登录后查看 API 面板中的实际地址和 Key 格式。
+
+### 3.5 验证认证
 
 ```bash
 claude --version
@@ -244,7 +275,13 @@ Claude Code 使用**三层配置合并**，后层覆盖前层：
 
 ---
 
-## 第 8 步：CLAUDE.md 记忆文件
+## 第 8 步：CLAUDE.md 记忆文件（⭐ 关键步骤）
+
+> 🚨 **跳过此步骤会导致 Claude 不了解你的工作背景，回复质量大打折扣！**
+>
+> CLAUDE.md 是 Claude Code 的"长期记忆"。没有它，Claude 就像**一个不了解你的新同事**，每次对话都要从头说明你的工作背景。
+>
+> 配置只需 **5 分钟**，但能显著提升后续所有对话的质量。
 
 ### 全局 CLAUDE.md
 
@@ -294,6 +331,38 @@ claude
 ### WispTerm
 
 在 WispTerm 中打开终端，直接使用 `claude` 命令，或通过 AI Agent 调用。
+
+### 🏗️ 如何将此 Skill 注册到 WispTerm
+
+> 将此 SKILL.md 保存到 WispTerm 的 skills 目录即可使其可被 Agent 调用。
+
+**Windows（便携版）：**
+
+```powershell
+# 1. 创建目标目录
+mkdir "%USERPROFILE%\.wispterm\skills\claude-test"
+
+# 2. 复制 SKILL.md（从 Git 仓库下载后）
+copy SKILL.md "%USERPROFILE%\.wispterm\skills\claude-test\SKILL.md"
+
+# 3. 重启 WispTerm 使技能生效
+```
+
+**Windows（安装版）：**
+
+```powershell
+mkdir "%APPDATA%\wispterm\skills\claude-test"
+copy SKILL.md "%APPDATA%\wispterm\skills\claude-test\SKILL.md"
+```
+
+**Linux / WSL：**
+
+```bash
+mkdir -p ~/.config/wispterm/skills/claude-test
+cp SKILL.md ~/.config/wispterm/skills/claude-test/SKILL.md
+```
+
+> 注册后，在 WispTerm 中输入 `$claude-test` 即可加载此技能。
 
 ---
 
@@ -345,6 +414,7 @@ claude
 cd /path/to/project
 claude
 ```
+
 ```
 > 帮我理解这个项目的结构
 > 项目依赖是什么？如何安装？
@@ -354,7 +424,6 @@ claude
 ### 工作流 2：代码审查
 
 ```bash
-cd /path/to/project
 claude -p "Review the latest git diff for correctness, performance, and security issues."
 ```
 
@@ -387,7 +456,12 @@ export PATH="$HOME/.nvm/versions/node/$(node -v)/bin:$PATH"
 
 ### Q2: 认证失败 `401 Unauthorized`
 
-检查 API Key 是否正确：`cat ~/.claude/settings.json | grep API_KEY`
+```bash
+cat ~/.claude/settings.json | grep -E "API_KEY|AUTH_TOKEN"
+```
+
+> ⚠️ MiniMax 不同环境可能使用 `ANTHROPIC_API_KEY` 或 `ANTHROPIC_AUTH_TOKEN`。
+> 如果一种不生效，请尝试另一种。详见第 3.4 节。
 
 ### Q3: 超时 `Request timed out`
 
@@ -428,20 +502,20 @@ nvm use --lts
 
 ### Q10: 如何切换 API 提供商
 
-编辑 `~/.claude/settings.json` 中的 `ANTHROPIC_BASE_URL` 和 `ANTHROPIC_API_KEY`。
+编辑 `~/.claude/settings.json` 中的 `ANTHROPIC_BASE_URL` 和认证字段。
 
 ---
 
 ## 环境变量速查
 
-| 变量 | 说明 | 示例值 |
-|------|------|------|
-| `ANTHROPIC_BASE_URL` | API 基地址 | `https://api.minimax.chat/anthropic` |
-| `ANTHROPIC_API_KEY` | API Key | `sk-xxxxxxxx` |
-| `API_TIMEOUT_MS` | 超时 (ms) | `600000` |
-| `DISABLE_NONESSENTIAL_TRAFFIC` | 禁用遥测 | `1` |
-| `CLAUDE_CODE_DISABLE_TERMINAL_TITLE` | 禁用标题修改 | `1` |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS` | 最大输出 token | `32000` |
+| 变量 | 说明 | 示例值 | 备选字段名 |
+|------|------|------|------|
+| `ANTHROPIC_BASE_URL` | API 基地址 | `https://api.minimax.chat/anthropic` | （也可用 `api.minimaxi.com`） |
+| `ANTHROPIC_API_KEY` | API Key | `sk-xxxxxxxx` | `ANTHROPIC_AUTH_TOKEN` |
+| `API_TIMEOUT_MS` | 超时 (ms) | `600000` | |
+| `DISABLE_NONESSENTIAL_TRAFFIC` | 禁用遥测 | `1` | |
+| `CLAUDE_CODE_DISABLE_TERMINAL_TITLE` | 禁用标题修改 | `1` | |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS` | 最大输出 token | `32000` | |
 
 ---
 
@@ -449,7 +523,7 @@ nvm use --lts
 
 - Node.js ≥ 18（推荐 LTS）
 - npm ≥ 9
-- 网络可访问 MiniMax API (`https://api.minimax.chat`)
+- 网络可访问 MiniMax API (`https://api.minimax.chat` 或 `https://api.minimaxi.com`)
 - WSL2 / Linux / macOS（Windows 需通过 WSL 使用）
 
 ---
@@ -458,4 +532,5 @@ nvm use --lts
 
 | 版本 | 日期 | 变更 |
 |------|------|------|
+| v1.1 | 2025-07-06 | 修复：添加 MiniMax API 变体说明（ANTHROPIC_AUTH_TOKEN / api.minimaxi.com）、CLAUDE.md 重要性强调、WispTerm Skill 注册说明 |
 | v1.0 | 2025-07-04 | 初始版本：12 步完整部署流程、参数详解、FAQ |
