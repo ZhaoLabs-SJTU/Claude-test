@@ -1506,6 +1506,894 @@ Error in download.file(...): Timeout of 60 seconds was reached
 
 ---
 
+
+# 第四篇：GitHub 高端组学分析包实战
+
+> **核心理念**：GitHub 上汇聚了组学领域最前沿的分析工具——它们往往比 CRAN/Bioconductor/PyPI 上的包更新、更强、功能更全。但这些包通常缺少详细文档、依赖链复杂、安装报错频繁。**Claude Code 会成为你的"GitHub 包私人安装顾问"**，从分析 README 到逐个击破依赖，再到跑通示范数据，全程陪伴。
+
+---
+
+## 4.1 为什么 GitHub 组学包让人头疼？
+
+| 痛点 | 具体表现 | Claude Code 如何帮你 |
+|------|---------|---------------------|
+| **依赖地狱** | 一个包依赖 20+ 个其他包，每个又有版本要求 | 逐层解析依赖链，生成安装脚本 |
+| **编译失败** | C/C++/Fortran 源码缺少系统库 | 识别缺失的 `.h` 文件，生成 `apt install` |
+| **文档简陋** | README 只有几行，没有详细安装步骤 | Claude 替你解读 README + GitHub Issues |
+| **版本敏感** | 包 A 要求 R ≥ 4.4，包 B 要求 Matrix ≤ 1.6 | 版本冲突诊断 + 解决方案 |
+| **平台差异** | Linux 可装但 macOS 报错（或反过来） | 根据你的系统自动调整命令 |
+| **无人维护** | 原作者已放弃，Issue 没人回 | Claude 分析源码，找到替代方案 |
+
+> 💡 **核心策略**：把 GitHub 包安装变成标准化的 5 步流程，每一步都有 Claude 把关。
+
+---
+
+## 4.2 Claude 辅助 GitHub 包安装：通用 5 步法
+
+### 第 1 步：环境侦察
+
+> **👤 小白**：帮我在当前服务器上准备一个安装 GitHub 组学包的环境
+
+> **🤖 Claude Code** 会先侦查你的系统：
+> ```bash
+> # Claude 帮你检查系统状态
+> lsb_release -a          # 操作系统版本
+> R --version             # R 版本
+> gcc --version           # 编译器版本
+> which cmake             # 是否有 cmake
+> df -h /home             # 磁盘空间
+> free -h                 # 内存
+> ```
+
+### 第 2 步：读取 GitHub 仓库信息
+
+> **👤 小白**：帮我分析这个 GitHub 包的安装要求 https://github.com/GreenleafLab/ArchR
+
+> **🤖 Claude Code** 会：
+> 1. 分析 README.md 中的安装说明
+> 2. 检查 DESCRIPTION 文件中的依赖列表
+> 3. 浏览近期 Issues 中的安装问题
+> 4. 输出完整的依赖清单和潜在坑点
+
+### 第 3 步：生成安装脚本
+
+> **🤖 Claude Code** 会生成分步安装脚本，每步都有验证：
+> ```bash
+> # Claude 生成的脚本结构：
+> # Step 1: 系统依赖 → 验证
+> # Step 2: R/conda 依赖 → 验证
+> # Step 3: GitHub 包本体 → 验证
+> # Step 4: 载入测试 → 验证
+> ```
+
+### 第 4 步：逐步执行 + 报错修复
+
+> Claude 不会一次性给你 100 行脚本然后不管。而是：
+> ```
+> 👤 执行第 1 步...报错了！
+> 🤖 分析报错 → 给出修复方案 → 重新执行
+> 👤 第 1 步通过！
+> 🤖 好的，现在执行第 2 步...
+> ```
+
+### 第 5 步：示范数据验证
+
+> ```r
+> # Claude 会从包的 vignette/test 目录中找到示范数据
+> # 生成完整代码帮你验证安装成功
+> ```
+
+---
+
+## 4.3 GitHub 高端组学包安装实战
+
+---
+
+### 4.3.1 ArchR — 单细胞 ATAC-seq 全能分析
+
+**GitHub**: https://github.com/GreenleafLab/ArchR  
+**用途**: scATAC-seq 全流程分析（QC、降维、聚类、峰注释、TF footprint、基因活性评分）  
+**难度**: ⭐⭐⭐⭐（依赖复杂，R 版本敏感）
+
+#### 安装前侦察
+
+> **👤 小白**：帮我装 ArchR，我的系统是 Ubuntu 22.04，R 4.3
+
+> **🤖 Claude Code**：ArchR 是最全面的 scATAC-seq 分析工具，但安装比较挑剔。让我先帮你分析依赖链。
+
+**完整依赖清单（Claude 自动分析）**：
+
+| 层级 | 依赖 | 来源 |
+|------|------|------|
+| 系统 | `libcairo2-dev`, `libgdal-dev`, `libproj-dev`, `libgeos-dev` | apt |
+| R 基础 | `devtools`, `BiocManager` | CRAN |
+| Bioc 核心 | `GenomicRanges`, `GenomeInfoDb`, `Rsamtools`, `rtracklayer`, `BSgenome` | Bioconductor |
+| Bioc 扩展 | `ComplexHeatmap`, `motifmatchr`, `chromVAR`, `TFBSTools` | Bioconductor |
+| GitHub 依赖 | `nabor` (jefferis/nabor) | GitHub |
+| 本体 | `ArchR` | GitHub |
+
+#### Claude 辅助安装脚本
+
+```bash
+#!/bin/bash
+# ==========================================
+# 🧬 ArchR 完整安装脚本（Ubuntu 22.04 + R 4.3+）
+# Claude Code 生成，每步独立验证
+# ==========================================
+
+# ===== 第 1 步：系统依赖 =====
+echo "=== Step 1: 系统依赖 ==="
+sudo apt update
+sudo apt install -y \
+  libcairo2-dev \
+  libgdal-dev \
+  libgeos-dev \
+  libproj-dev \
+  libxml2-dev \
+  libssl-dev \
+  libcurl4-openssl-dev \
+  libfontconfig1-dev \
+  libharfbuzz-dev \
+  libfribidi-dev \
+  libfreetype6-dev \
+  libpng-dev \
+  libtiff5-dev \
+  libjpeg-dev \
+  build-essential \
+  cmake
+
+echo "✅ 系统依赖安装完成"
+```
+
+```r
+# ===== 第 2 步：R 包依赖（在 R 中执行）=====
+cat("\n=== Step 2: R 基础依赖 ===\n")
+
+# 安装 devtools 和 BiocManager
+install.packages(c("devtools", "BiocManager"), repos = "https://cran.r-project.org")
+
+# 安装 Bioconductor 核心依赖
+BiocManager::install(c(
+  "GenomicRanges", "GenomeInfoDb", "Rsamtools", "rtracklayer",
+  "BSgenome", "BSgenome.Hsapiens.UCSC.hg38", "Biostrings",
+  "ComplexHeatmap", "motifmatchr", "chromVAR", "TFBSTools",
+  "JASPAR2020", "DirichletMultinomial", "MatrixGenerics",
+  "SingleCellExperiment", "SummarizedExperiment", "S4Vectors",
+  "IRanges", "DelayedArray", "Matrix"
+), update = TRUE, ask = FALSE)
+
+# ===== 第 3 步：安装 nabor（ArchR 的 GitHub 依赖）=====
+cat("\n=== Step 3: GitHub 依赖 nabor ===\n")
+devtools::install_github("jefferis/nabor")
+
+# 验证 nabor
+library(nabor)
+cat("✅ nabor 安装成功\n")
+
+# ===== 第 4 步：安装 ArchR 本体 =====
+cat("\n=== Step 4: 安装 ArchR ===\n")
+devtools::install_github("GreenleafLab/ArchR", ref = "master", 
+                         repos = BiocManager::repositories())
+
+# ===== 第 5 步：验证安装 =====
+cat("\n=== Step 5: 验证 ===\n")
+library(ArchR)
+cat("ArchR 版本:", as.character(packageVersion("ArchR")), "\n")
+
+# 添加基因组注释（后续分析必备）
+ArchR::addArchRGenome("hg38")
+cat("\n✅ ArchR 安装完成，已配置 hg38 基因组！\n")
+```
+
+#### ArchR 常见安装报错（Claude 修复）
+
+> **👤 小白**：`devtools::install_github("GreenleafLab/ArchR")` 报错了：
+> ```
+> ERROR: dependency 'Cairo' is not available for package 'ArchR'
+> ```
+
+> **🤖 Claude Code**：`Cairo` 包需要系统级依赖。解决：
+> ```bash
+> # 先退出 R，在 bash 中安装系统依赖
+> sudo apt install libcairo2-dev -y
+> ```
+> 然后在 R 中：
+> ```r
+> install.packages("Cairo")
+> # 确认安装
+> library(Cairo)  # 应返回 TRUE
+> ```
+
+> **👤 小白**：又报了另一个错：
+> ```
+> ERROR: configuration failed for package 'magick'
+> ```
+
+> **🤖 Claude Code**：`magick` 也需要系统库：
+> ```bash
+> sudo apt install libmagick++-dev -y
+> ```
+
+> **👤 小白**：现在装好了但 `library(ArchR)` 报：
+> ```
+> Error: package 'GenomicRanges' was built under R 4.4.0
+> ```
+
+> **🤖 Claude Code**：R 版本兼容问题。解决方案：
+> ```r
+> # 方案 1：重新编译 Bioconductor 包以匹配你的 R 版本
+> BiocManager::install(version = "3.18")  # 根据你的 R 版本选择
+> 
+> # 方案 2：如果方案 1 不行，用 conda 管理 R 环境
+> ```
+
+#### ArchR 示范数据测试
+
+```r
+# ==========================================
+# 🧬 ArchR 示范数据入门
+# ==========================================
+library(ArchR)
+
+# 设置工作目录
+dir.create("~/ArchR_Tutorial", showWarnings = FALSE)
+setwd("~/ArchR_Tutorial")
+
+# 创建 Arrow 文件
+ArrowFiles <- createArrowFiles(
+  inputFiles = c("pbmc_atac/fragments.tsv.gz"),
+  sampleNames = c("PBMC"),
+  minTSS = 4,
+  minFrags = 1000,
+  addTileMat = TRUE,
+  addGeneScoreMat = TRUE
+)
+
+# 创建 ArchR 项目
+proj <- ArchRProject(
+  ArrowFiles = ArrowFiles,
+  outputDirectory = "PBMC_ATAC",
+  copyArrows = TRUE
+)
+
+# QC、降维、聚类、UMAP
+proj <- filterDoublets(proj)
+proj <- addIterativeLSI(proj, useMatrix = "TileMatrix", name = "IterativeLSI")
+proj <- addClusters(proj, reducedDims = "IterativeLSI")
+proj <- addUMAP(proj, reducedDims = "IterativeLSI")
+
+# 可视化
+plotEmbedding(proj, colorBy = "cellColData", name = "Clusters", embedding = "UMAP")
+cat("\n✅ ArchR 示范数据流程跑通！\n")
+```
+
+#### 从示范数据到自测数据
+
+> **👤 小白**：我有自己的 10x ATAC 数据（2 个样本：tumor 和 normal），怎么分析？
+
+> **🤖 Claude Code**：只需修改输入文件路径，其余代码基本不变：
+> ```r
+> ArrowFiles <- createArrowFiles(
+>   inputFiles = c("tumor/fragments.tsv.gz", "normal/fragments.tsv.gz"),
+>   sampleNames = c("Tumor", "Normal"),
+>   minTSS = 4, minFrags = 1000,
+>   addTileMat = TRUE, addGeneScoreMat = TRUE
+> )
+> # ... 后续代码完全相同
+> ```
+
+---
+
+### 4.3.2 scVelo — RNA 速度分析（Python）
+
+**GitHub**: https://github.com/theislab/scvelo  
+**用途**: 从 splicing 信息推断 RNA 速度，预测细胞未来状态  
+**难度**: ⭐⭐⭐
+
+```bash
+# 创建环境
+mamba create -n scvelo python=3.10 -y
+mamba activate scvelo
+mamba install -c conda-forge scanpy scvelo -y
+
+# 验证
+python -c "import scvelo as scv; print(scv.__version__)"
+```
+
+#### scVelo 示范数据 + 完整流程
+
+```python
+import scvelo as scv
+import scanpy as sc
+
+# 下载示范数据（胰腺发育，约 3000 细胞）
+adata = scv.datasets.pancreas()
+print(adata)
+
+# 预处理
+sc.pp.filter_genes(adata, min_shared_counts=20)
+sc.pp.normalize_per_cell(adata)
+sc.pp.log1p(adata)
+sc.pp.highly_variable_genes(adata, n_top_genes=2000, flavor='seurat_v3')
+adata = adata[:, adata.var.highly_variable].copy()
+
+# 计算 RNA 速度
+scv.pp.moments(adata, n_pcs=30, n_neighbors=30)
+scv.tl.velocity(adata)
+scv.tl.velocity_graph(adata)
+
+# 可视化
+scv.pl.velocity_embedding_stream(adata, basis='umap', color='clusters')
+
+# 潜时间
+scv.tl.latent_time(adata)
+scv.pl.scatter(adata, color='latent_time', color_map='gnuplot')
+
+print("✅ scVelo 示范数据流程跑通！")
+```
+
+#### 常见报错
+
+> **👤 小白**：`scv.tl.velocity(adata)` 报错 "No spliced/unspliced counts found"
+
+> **🤖 Claude Code**：你的数据没有 spliced/unspliced 层。需要用 velocyto 或 STARsolo 生成 loom 文件：
+> ```bash
+> # 方法 1：velocyto CLI（从 BAM 生成 loom）
+> velocyto run10x -m repeat_mask.gtf my_sample/ path/to/genes.gtf
+> 
+> # 方法 2：STARsolo 直接输出
+> STAR --runMode solo ... --soloFeatures Gene SJ
+> ```
+
+---
+
+### 4.3.3 CellRank — 细胞命运概率推断
+
+**GitHub**: https://github.com/theislab/cellrank  
+**用途**: 基于 RNA velocity 推断细胞命运转变概率和初始/终末状态  
+**难度**: ⭐⭐⭐
+
+```bash
+pip install cellrank
+```
+
+```python
+import cellrank as cr
+import scvelo as scv
+
+# 肝脏再生示范数据
+adata = cr.datasets.liver_regeneration()
+
+# 终端状态推断
+vk = cr.kernels.VelocityKernel(adata)
+vk.compute_transition_matrix()
+g = cr.estimators.GPCCA(vk)
+g.fit(cluster_key='clusters')
+g.predict_terminal_states()
+g.plot_terminal_states()
+
+# 命运概率
+g.compute_fate_probabilities()
+g.plot_fate_probabilities(same_plot=False)
+
+print("✅ CellRank 示范数据流程跑通！")
+```
+
+---
+
+### 4.3.4 CellOracle — 基因调控网络+扰动模拟
+
+**GitHub**: https://github.com/morris-lab/CellOracle  
+**用途**: 从 scRNA+scATAC 构建 GRN，模拟转录因子扰动对细胞命运的影响  
+**难度**: ⭐⭐⭐⭐⭐（最复杂的组学包之一）
+
+| 难点 | 说明 | Claude 解决方案 |
+|------|------|----------------|
+| Python 版本 | 要求 3.9，不兼容 3.10+ | 创建 Python 3.9 环境 |
+| gimmemotifs | 大型依赖包，安装慢 | 分步安装 gimmemotifs |
+| 基因组文件 | 需要下载大量参考数据 | 列出所有需要的文件及下载命令 |
+
+```bash
+mamba create -n celloracle python=3.9 -y
+mamba activate celloracle
+mamba install -c conda-forge -c bioconda gimmemotifs -y
+pip install celloracle
+
+python -c "import celloracle as co; print('CellOracle version:', co.__version__)"
+```
+
+---
+
+### 4.3.5 Squidpy — 空间转录组分析（Python）
+
+**GitHub**: https://github.com/scverse/squidpy  
+**用途**: 空间转录组数据分析（10x Visium、MERFISH、Slide-seq 等）  
+**难度**: ⭐⭐
+
+```bash
+mamba install -c conda-forge squidpy -y
+```
+
+```python
+import squidpy as sq
+import scanpy as sc
+
+# Visium 小鼠脑数据
+adata = sq.datasets.visium_hne_adata()
+img = sq.datasets.visium_hne_image()
+
+# 空间散点图
+sq.pl.spatial_scatter(adata, color='cluster', size=1.5)
+
+# 邻域富集分析
+sq.gr.spatial_neighbors(adata)
+sq.gr.nhood_enrichment(adata, cluster_key='cluster')
+sq.pl.nhood_enrichment(adata, cluster_key='cluster')
+
+# 配体-受体空间共表达
+sq.gr.ligrec(adata, cluster_key='cluster')
+sq.pl.ligrec(adata, source_groups='Pyramidal layer', target_groups='Olfactory bulb')
+
+print("✅ Squidpy 空间转录组示范跑通！")
+```
+
+---
+
+### 4.3.6 Giotto — 空间组学分析（R）
+
+**GitHub**: https://github.com/drieslab/Giotto  
+**用途**: R 版空间转录组分析，功能覆盖极全  
+**难度**: ⭐⭐⭐⭐
+
+```r
+# 系统依赖
+# sudo apt install libgdal-dev libgeos-dev libproj-dev -y
+
+# CRAN 依赖
+install.packages("remotes")
+install.packages(c("Rcpp", "RcppArmadillo", "data.table", "ggplot2"))
+
+# Bioconductor 依赖
+BiocManager::install(c(
+  "SingleCellExperiment", "SpatialExperiment", "DropletUtils",
+  "scran", "scater", "edgeR", "limma"
+))
+
+# Giotto 本体
+remotes::install_github("drieslab/Giotto@master")
+
+# Python 环境（Giotto 需要）
+library(Giotto)
+installGiottoEnvironment()
+checkGiottoEnvironment()
+```
+
+> **👤 小白**：`installGiottoEnvironment()` 失败了
+
+> **🤖 Claude Code**：手动替代方案：
+> ```bash
+> mamba create -n giotto_env python=3.10 -y
+> mamba activate giotto_env
+> pip install pandas numpy python-louvain leidenalg smfishHmrf
+> ```
+> 然后在 R 中：`reticulate::use_condaenv("giotto_env", required = TRUE)`
+
+---
+
+### 4.3.7 SPOTlight — 空间去卷积
+
+**GitHub**: https://github.com/MarcElosua/SPOTlight  
+**用途**: 用 scRNA-seq 参考数据对空间转录组的每个 spot 进行细胞类型比例推断  
+**难度**: ⭐⭐⭐
+
+```r
+BiocManager::install("SPOTlight")
+library(SPOTlight)
+
+# Claude 会帮你：
+# 1. 下载合适的参考数据集
+# 2. 下载空间转录组数据
+# 3. 生成完整的去卷积代码
+```
+
+---
+
+### 4.3.8 LIGER — 多组学整合分析
+
+**GitHub**: https://github.com/welch-lab/liger  
+**用途**: 整合多个 scRNA-seq/scATAC-seq 数据集（跨样本、跨平台、跨物种）  
+**难度**: ⭐⭐⭐
+
+```r
+install.packages("rliger")
+library(rliger)
+```
+
+Python 版：
+```bash
+pip install pyliger
+```
+
+---
+
+### 4.3.9 scvi-tools — 深度学习单细胞分析
+
+**GitHub**: https://github.com/scverse/scvi-tools  
+**用途**: 基于深度学习的批次校正 (scVI)、数据整合 (scANVI)、差异表达  
+**难度**: ⭐⭐⭐（GPU 可选，CPU 也能跑）
+
+```bash
+mamba create -n scvi python=3.10 -y
+mamba activate scvi
+mamba install -c conda-forge scvi-tools -y
+```
+
+```python
+import scvi
+import scanpy as sc
+
+# 示范：批次校正
+adata = scvi.data.purified_pbmc_dataset()
+sc.pp.filter_genes(adata, min_counts=3)
+adata.layers["counts"] = adata.X.copy()
+
+scvi.model.SCVI.setup_anndata(adata, layer="counts", batch_key="batch")
+model = scvi.model.SCVI(adata, n_layers=2, n_latent=30, gene_likelihood="nb")
+model.train(max_epochs=100)
+
+adata.obsm["X_scVI"] = model.get_latent_representation()
+sc.pp.neighbors(adata, use_rep="X_scVI")
+sc.tl.umap(adata)
+sc.pl.umap(adata, color=["batch", "celltype"], ncols=2)
+
+print("✅ scVI 批次校正完成！")
+```
+
+#### 内存优化
+
+> **👤 小白**：scVI 训练时内存不够
+
+> **🤖 Claude Code**：
+> ```python
+> # 策略 1：减少 batch size
+> model.train(max_epochs=100, batch_size=64, early_stopping=True)
+> # 策略 2：减少潜变量维度
+> model = scvi.model.SCVI(adata, n_latent=10, n_layers=1)
+> # 策略 3：对超大数据集进行子采样
+> sc.pp.subsample(adata, n_obs=20000)
+> ```
+
+---
+
+### 4.3.10 NicheNet — 配体-受体交互预测
+
+**GitHub**: https://github.com/saeyslab/nichenetr  
+**用途**: 从发送细胞预测哪些配体能激活接收细胞的哪些靶基因  
+**难度**: ⭐⭐⭐
+
+```r
+remotes::install_github("saeyslab/nichenetr")
+library(nichenetr)
+
+# 下载数据库（一次性，约 1.5GB）
+ligand_target_matrix <- readRDS(url("https://zenodo.org/record/7074291/files/ligand_target_matrix_nsga2r_final.rds"))
+lr_network <- readRDS(url("https://zenodo.org/record/7074291/files/lr_network_human_21122021.rds"))
+weighted_networks <- readRDS(url("https://zenodo.org/record/7074291/files/weighted_networks_nsga2r_final.rds"))
+```
+
+---
+
+### 4.3.11 SCENIC+ — 增强版转录因子分析
+
+**GitHub**: https://github.com/aertslab/SCENICplus  
+**用途**: 同时利用 scRNA-seq 和 scATAC-seq 数据推断增强子驱动的 GRN  
+**难度**: ⭐⭐⭐⭐⭐
+
+```bash
+mamba create -n scenicplus python=3.9 -y
+mamba activate scenicplus
+pip install scenicplus
+# 数据库需单独下载（约 10GB+），Claude 会生成下载命令
+```
+
+> **建议**：第一次做 TF 分析，先从 pySCENIC 入门（见第一篇 1.11 节）。SCENIC+ 适合有经验的用户。
+
+---
+
+### 4.3.12 DeepVelo — 深度学习 RNA 速度
+
+**GitHub**: https://github.com/bowang-lab/DeepVelo  
+**用途**: 用深度神经网络比 scVelo 更准确地推断 RNA 速度  
+**难度**: ⭐⭐⭐
+
+```bash
+pip install deepvelo
+```
+
+---
+
+### 4.3.13 其他精选 GitHub 组学包速查
+
+| 包名 | GitHub | 用途 | 难度 | 一句安装 |
+|------|--------|------|:--:|------|
+| **Cicero** | cole-trapnell-lab/cicero-release | scATAC 顺式调控互作 | ⭐⭐ | `BiocManager::install("cicero")` |
+| **DoubletFinder** | chris-mcginnis-uoft/DoubletFinder | 双细胞检测 | ⭐ | `remotes::install_github("...")` |
+| **CopyKAT** | navinlabcode/copykat | 拷贝数变异单细胞 | ⭐⭐ | `remotes::install_github("...")` |
+| **inferCNV** | broadinstitute/inferCNV | 肿瘤 CNV 推断 | ⭐⭐⭐ | `remotes::install_github("...")` |
+| **scArches** | theislab/scarches | 参考映射迁移学习 | ⭐⭐ | `pip install scarches` |
+| **scGen** | theislab/scgen | 扰动响应预测 | ⭐⭐ | `pip install scgen` |
+| **scIB** | theislab/scib | 整合方法基准测试 | ⭐⭐ | `pip install scib-metrics` |
+| **muon** | scverse/muon | 多组学 Python 框架 | ⭐⭐ | `mamba install -c conda-forge muon` |
+| **Vitessce** | vitessce/vitessce | 交互式可视化 | ⭐⭐⭐ | `pip install vitessce[all]` |
+| **decoupler** | saezlab/decoupler | 通路活性推断 | ⭐ | `pip install decoupler` |
+| **Tangram** | broadinstitute/Tangram | 空间数据映射 | ⭐⭐⭐ | `pip install tangram-sc` |
+| **GSEApy** | zqfang/GSEApy | Python GSEA 富集 | ⭐ | `pip install gseapy` |
+| **Pegasus** | lilab-bcb/pegasus | 大规模单细胞分析 | ⭐⭐ | `pip install pegasuspy` |
+
+> 💡 **Claude 使用技巧**：把上表中任何一个包名发给 Claude Code，它都会生成完整的安装 + 示范数据代码。
+
+---
+
+## 4.4 示范数据测试全攻略
+
+### 4.4.1 通用测试数据获取渠道
+
+| 数据来源 | 数据类型 | Claude 辅助方式 |
+|---------|---------|---------------|
+| **10x Genomics Datasets** | scRNA/ATAC/Multiome/Visium | Claude 生成下载命令 |
+| **SeuratData** | R 包内置示例 | Claude 指导安装和加载 |
+| **Scanpy datasets** | Python 内置示例 | 一行代码 |
+| **GEO** | 各种公开数据 | Claude 帮你筛选合适数据集 |
+| **Zenodo/Figshare** | 论文配套数据 | Claude 生成下载命令 |
+| **cellxgene** | CZ CELLxGENE 百万级数据 | Claude 指导 Census API |
+
+### 4.4.2 每个包验证完成检查清单
+
+> 把下面的清单发给 Claude Code：**"帮我逐项验证 XX 包是否安装成功"**
+
+| # | 检查项 | 命令/代码 |
+|---|--------|---------|
+| 1 | `library(包名)` 无报错 | `library(ArchR)` |
+| 2 | 版本号正常输出 | `packageVersion("ArchR")` |
+| 3 | 示范数据能加载 | `data("xxx")` 或 `包名::xxx` |
+| 4 | 能创建基础对象 | `proj <- ArchRProject(...)` |
+| 5 | 能运行最小分析 | QC → 降维 → 可视化 |
+| 6 | 能输出图片 | `plotEmbedding(...)` |
+
+### 4.4.3 Claude 辅助调试示范数据错误
+
+> **👤 小白**：示范数据报错了，我完全不知道哪里出了问题
+
+> **🤖 Claude Code** 的调试策略：
+> 1. **先确认环境**：`sessionInfo()`（R）或 `conda list`（Python）
+> 2. **再确认数据加载**：检查数据维度、类型、是否有缺失值
+> 3. **分步执行**：把长代码拆成单步，定位是哪一步出错
+> 4. **对比官方文档**：确认参数名称是否有变化
+> 5. **搜索 GitHub Issues**：看看是否已知 bug
+
+---
+
+## 4.5 从示范数据到自测数据：完整迁移指南
+
+### 4.5.1 数据格式适配
+
+> 这是从"跑通示范"到"分析自己数据"最关键的一步。
+
+| 你的数据格式 | 目标工具 | Claude 帮你做什么 |
+|-------------|---------|-----------------|
+| 10x cellranger 输出 | Seurat/Scanpy | 生成 `Read10X()` / `sc.read_10x_mtx()` 代码 |
+| h5ad (别人给的) | Seurat | 生成 `ReadH5AD()` + SeuratDisk 转换代码 |
+| rds (别人给的) | Scanpy | 生成 `readRDS()` + `anndata` 转换代码 |
+| 华大 FASTQ | STARsolo | 生成 STARsolo 完整参数 |
+| GEO 下载的矩阵 | DESeq2 | 生成数据清洗 + 格式化代码 |
+| 自己测的 FASTQ | Cell Ranger | 生成 `cellranger count` 完整参数 |
+
+### 4.5.2 参数调优策略
+
+> **👤 小白**：我的数据和示范数据差别很大，参数怎么调？
+
+> **🤖 Claude Code** 的参数调优方法：
+> ```
+> 1. 描述你的数据：细胞数、基因数、测序深度、样本数、实验设计
+> 2. Claude 根据数据规模推荐参数范围
+> 3. 先用默认参数跑一遍，查看中间结果
+> 4. 根据 QC 指标（如 UMAP 分群效果）调整并重跑
+> 5. Claude 每一步都会解释"为什么选这个值"
+> ```
+
+### 4.5.3 结果验证与生物学解读
+
+> **👤 小白**：跑完了，但不知道结果对不对
+
+> **🤖 Claude Code**：
+> ```r
+> # Claude 会检查这些关键指标：
+> # 1. QC 分布是否合理（nFeature/nCount/mito%）
+> # 2. UMAP 聚类是否有生物学意义
+> # 3. marker 基因是否正确
+> # 4. 批次效应是否被校正
+> # 5. 差异基因/峰是否与预期一致
+> ```
+
+---
+
+## 4.6 GitHub 包安装故障全解（15 个专属错误）
+
+### 错误 G1：`devtools::install_github` 超时
+
+```
+Error: Failed to install 'xxx' from GitHub:
+ Timeout was reached: [api.github.com] Connection timed out
+```
+
+> **🤖 Claude Code**：
+> ```r
+> options(timeout = 600)
+> # 或手动下载：
+> # install.packages("包名.tar.gz", repos = NULL, type = "source")
+> ```
+
+### 错误 G2：依赖包版本不兼容
+
+```
+ERROR: dependency 'Matrix' (>= 1.7.0) is not available for 'xxx'
+```
+
+> **🤖 Claude Code**：
+> ```r
+> packageVersion("Matrix")  # 查看当前版本
+> install.packages("Matrix")  # 更新
+> # 如需旧版：install.packages("https://cran.r-project.org/src/contrib/Archive/...")
+> ```
+
+### 错误 G3：`configure: error: C compiler cannot create executables`
+
+> **🤖 Claude Code**：
+> ```bash
+> which gcc  # 确认编译器存在
+> sudo apt install build-essential -y  # 如缺失则安装
+> ```
+
+### 错误 G4：`fatal error: XXXX.h: No such file or directory`
+
+> **🤖 Claude Code**：把 `XXXX.h` 告诉 Claude，它会告诉你对应的 apt 包名：
+> ```bash
+> # gdal.h        → sudo apt install libgdal-dev
+> # curl/curl.h   → sudo apt install libcurl4-openssl-dev
+> # xml2/xxx.h    → sudo apt install libxml2-dev
+> # openssl/ssl.h → sudo apt install libssl-dev
+> # hdf5.h        → sudo apt install libhdf5-dev
+> # cairo.h       → sudo apt install libcairo2-dev
+> # Magick++.h    → sudo apt install libmagick++-dev
+> ```
+
+### 错误 G5：`Error in dyn.load: unable to load shared object`
+
+> **🤖 Claude Code**：重新从源码安装或检查缺失的动态库：
+> ```bash
+> ldd /path/to/package/libs/包名.so | grep "not found"
+> ```
+
+### 错误 G6：`R version mismatch (R >= 4.4 required)`
+
+> **🤖 Claude Code**：
+> ```bash
+> # 用 conda 管理不同 R 版本（推荐）
+> mamba create -n r44 -c conda-forge r-base=4.4 r-essentials -y
+> ```
+
+### 错误 G7：`git clone` 失败
+
+```
+Error in git2r::clone(...) : failed to resolve address for github.com
+```
+
+> **🤖 Claude Code**：
+> ```r
+> Sys.setenv(DOWNLOAD_METHOD = "curl")
+> # 或手动下载 ZIP：
+> # install.packages("pkg-master.zip", repos = NULL, type = "source")
+> # 国内加速：
+> # install.packages("https://ghproxy.com/https://github.com/user/pkg/archive/master.tar.gz")
+> ```
+
+### 错误 G8：`no package called 'XXX'` — 间接依赖缺失
+
+> **🤖 Claude Code**：找到缺失的包名后：
+> ```r
+> BiocManager::install("缺失的包名")
+> ```
+
+### 错误 G9：Python `ModuleNotFoundError: No module named 'XXX'`
+
+> **🤖 Claude Code**：
+> ```bash
+> which python && which pip  # 确认使用正确的环境
+> python -m pip install 包名  # 确保用正确的 pip
+> ```
+
+### 错误 G10：`memory exhausted` — 编译时内存不足
+
+> **🤖 Claude Code**：
+> ```bash
+> export MAKEFLAGS="-j2"  # 限制并行编译线程数
+> # 或增加 swap
+> sudo fallocate -l 10G /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile
+> ```
+
+### 错误 G11：`package 'XXX' is in use and will not be installed`
+
+> **🤖 Claude Code**：退出所有 R session，新 session 中：
+> ```r
+> remove.packages("XXX")
+> ```
+
+### 错误 G12：macOS `clang: error: unsupported option '-fopenmp'`
+
+> **🤖 Claude Code**：
+> ```bash
+> brew install llvm libomp
+> # 在 ~/.R/Makevars 中添加 CC/CXX/LDFLAGS 配置
+> ```
+
+### 错误 G13：`ERROR: This package requires gfortran`
+
+> **🤖 Claude Code**：
+> ```bash
+> sudo apt install gfortran -y  # Linux
+> brew install gfortran         # macOS
+> ```
+
+### 错误 G14：`make: cmake: Command not found`
+
+> **🤖 Claude Code**：
+> ```bash
+> sudo apt install cmake -y
+> ```
+
+### 错误 G15：GitHub 仓库不存在或已改名
+
+```
+Error: HTTP error 404. Not Found
+```
+
+> **🤖 Claude Code**：
+> 1. 检查 GitHub 仓库 URL 是否正确
+> 2. 搜索该包是否已迁移到别的仓库
+> 3. 检查是否有 Bioconductor 版本
+> 4. 如果包已废弃，Claude 会推荐替代方案
+
+> 💡 **一句总结**：**GitHub 组学包安装的本质 = 系统依赖 + R/Python 依赖 + 版本兼容 + 网络优化。而 Claude Code 可以一次性帮你理清全部四个维度。**
+
+---
+
+## 4.7 自测数据应用工作流
+
+### 从零到结果的完整路径
+
+```
+┌─────────────┐    ┌──────────────┐    ┌────────────────┐    ┌──────────┐
+│  自己的数据   │ →  │  Claude 分析  │ →  │  适配示范代码   │ →  │  结果解读 │
+│ (FASTQ/h5ad) │    │  数据特征     │    │  修改参数运行   │    │  生物学结论 │
+└─────────────┘    └──────────────┘    └────────────────┘    └──────────┘
+```
+
+### 实战案例：用 Claude 从华大 FASTQ 到 Seurat 对象
+
+> **👤 小白**：我的数据是 DNBelab C4 测序的 FASTQ，想用 Seurat 分析，请生成完整代码
+
+> Claude 会根据：
+> - 你的 FASTQ 命名 → 正确的 `--soloCBwhitelist` 参数
+> - 你的物种 → 正确的参考基因组
+> - 你的样本数 → 批量处理脚本
+
+**这一切只需要你告诉 Claude 三件事**：
+1. 我的 FASTQ 文件在哪里？
+2. 是什么平台测的（10x / 华大 / Smart-seq2）？
+3. 想分析什么（聚类 / 差异 / 拟时序 / 细胞通讯）？
+
+---
+
 # 附录
 
 ## 附录 A：Claude Code 对话技巧速查
