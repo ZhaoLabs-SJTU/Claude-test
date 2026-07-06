@@ -11,7 +11,7 @@ description: Claude Code 从零安装、配置与使用。涵盖 nvm/Node.js 安
 
 | 文件 | 用途 |
 |------|------|
-| **SKILL.md** (本文件) | AI 技能定义，供 WispTerm Agent 加载使用 |
+| **SKILL.md** (本文件) | AI 技能定义，供终端 AI Agent 加载使用 |
 | [README.md](README.md) | 快速参考卡片，30 秒速查 |
 | [完全指南.md](完全指南.md) | 面向零基础小白的 13 章完整教程 |
 | [Claude_Code_从零到精通_完全指南.docx](Claude_Code_从零到精通_完全指南.docx) | Word 文档，可打印版 |
@@ -328,41 +328,37 @@ claude
 
 在 Terminal 面板中直接使用 `claude` 命令。
 
-### WispTerm
+### 🏗️ 如何将此 Skill 注册到终端 AI Agent
 
-在 WispTerm 中打开终端，直接使用 `claude` 命令，或通过 AI Agent 调用。
-
-### 🏗️ 如何将此 Skill 注册到 WispTerm
-
-> 将此 SKILL.md 保存到 WispTerm 的 skills 目录即可使其可被 Agent 调用。
+> 将 SKILL.md 保存到终端 AI Agent 的 skills 目录即可使其可被调用。
 
 **Windows（便携版）：**
 
 ```powershell
 # 1. 创建目标目录
-mkdir "%USERPROFILE%\.wispterm\skills\claude-test"
+mkdir "%USERPROFILE%\.terminal-agent\skills\claude-test"
 
 # 2. 复制 SKILL.md（从 Git 仓库下载后）
-copy SKILL.md "%USERPROFILE%\.wispterm\skills\claude-test\SKILL.md"
+copy SKILL.md "%USERPROFILE%\.terminal-agent\skills\claude-test\SKILL.md"
 
-# 3. 重启 WispTerm 使技能生效
+# 3. 重启终端使技能生效
 ```
 
 **Windows（安装版）：**
 
 ```powershell
-mkdir "%APPDATA%\wispterm\skills\claude-test"
-copy SKILL.md "%APPDATA%\wispterm\skills\claude-test\SKILL.md"
+mkdir "%APPDATA%\terminal-agent\skills\claude-test"
+copy SKILL.md "%APPDATA%\terminal-agent\skills\claude-test\SKILL.md"
 ```
 
 **Linux / WSL：**
 
 ```bash
-mkdir -p ~/.config/wispterm/skills/claude-test
-cp SKILL.md ~/.config/wispterm/skills/claude-test/SKILL.md
+mkdir -p ~/.config/terminal-agent/skills/claude-test
+cp SKILL.md ~/.config/terminal-agent/skills/claude-test/SKILL.md
 ```
 
-> 注册后，在 WispTerm 中输入 `$claude-test` 即可加载此技能。
+> 注册后，在终端中输入 `$claude-test` 即可加载此技能。
 
 ---
 
@@ -647,5 +643,5 @@ docker compose build
 | 版本 | 日期 | 变更 |
 |------|------|------|
 | v1.2 | 2025-07-07 | 新增 Docker 一键部署（Dockerfile + docker-compose + .env.example）、Docker vs 本地安装对比、Docker 故障排查 |
-| v1.1 | 2025-07-06 | 修复：添加 MiniMax API 变体说明（ANTHROPIC_AUTH_TOKEN / api.minimaxi.com）、CLAUDE.md 重要性强调、WispTerm Skill 注册说明 |
+| v1.1 | 2025-07-06 | 修复：添加 MiniMax API 变体说明（ANTHROPIC_AUTH_TOKEN / api.minimaxi.com）、CLAUDE.md 重要性强调、终端 AI Agent Skill 注册说明 |
 | v1.0 | 2025-07-04 | 初始版本：12 步完整部署流程、参数详解、FAQ |
