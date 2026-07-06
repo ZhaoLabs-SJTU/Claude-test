@@ -1,0 +1,33 @@
+# =============================================
+# Claude Code Docker Compose 配置
+# =============================================
+version: "3.8"
+
+services:
+  claude:
+    # ---- 构建方式 ----
+    build: .
+    image: zhaolabs/claude-code:latest
+    container_name: claude-code
+
+    # ---- 环境变量（从 .env 文件读取） ----
+    env_file:
+      - .env
+
+    # ---- 交互模式（必须） ----
+    stdin_open: true
+    tty: true
+
+    # ---- 卷挂载 ----
+    volumes:
+      # 持久化配置（settings.json、CLAUDE.md）
+      - claude-config:/home/claude/.claude
+      # 挂载当前项目目录到 /workspace
+      - .:/workspace
+
+    # ---- 入口覆盖（如需单次问答） ----
+    # command: claude -p "帮我理解这个项目"
+
+volumes:
+  claude-config:
+    driver: local
