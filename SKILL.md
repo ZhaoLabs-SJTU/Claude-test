@@ -1,6 +1,6 @@
 ---
 name: claude-test
-description: Claude Code 从零安装、配置与使用。涵盖 nvm/Node.js 安装、Claude Code 部署、MiniMax/Anthropic API 认证、settings.json 三层配置、模型选择策略、权限模式、CLAUDE.md 记忆文件、IDE 集成、命令速查、四个实战工作流、FAQ 故障排查。
+description: Claude Code 从零安装、配置与使用。涵盖 nvm/Node.js 安装、Claude Code 部署、MiniMax/Anthropic API 认证、settings.json 三层配置、模型选择策略、权限模式、CLAUDE.md 记忆文件、IDE 集成、命令速查、四个实战工作流、FAQ 故障排查、Docker 一键部署。
 ---
 
 # Claude Code 安装配置完全指南
@@ -506,6 +506,119 @@ nvm use --lts
 
 ---
 
+## 第 13 步：Docker 一键部署（免安装）
+
+> 🐳 **适用场景**：不想手动安装 nvm/Node.js？用 Docker！一条命令即可运行。
+
+### 13.1 前置条件
+
+```bash
+# 检查 Docker 是否已安装
+docker --version
+# 应输出 Docker version 24.x 或更高版本
+
+docker compose version
+# 应输出 Docker Compose version v2.x 或更高版本
+```
+
+> 未安装 Docker？访问 https://docs.docker.com/get-docker/ 下载 Docker Desktop。
+
+### 13.2 三步启动
+
+```bash
+# 第 1 步：克隆仓库
+git clone https://github.com/ZhaoLabs-SJTU/Claude-test.git
+cd Claude-test
+
+# 第 2 步：配置 API Key
+cp .env.example .env
+nano .env  # 填入你的 MiniMax API Key
+
+# 第 3 步：启动
+docker compose run --rm claude
+```
+
+### 13.3 .env 文件配置详解
+
+```bash
+# MiniMax 国内版（推荐）
+ANTHROPIC_BASE_URL=https://api.minimaxi.com/anthropic
+ANTHROPIC_AUTH_TOKEN=sk-你的API-Key
+
+# MiniMax 海外版
+ANTHROPIC_BASE_URL=https://api.minimax.chat/anthropic
+ANTHROPIC_API_KEY=sk-你的API-Key
+
+# 可选参数
+CLAUDE_MODEL=MiniMax-M2.7        # 默认模型
+PERMISSION_MODE=acceptEdits       # 权限模式
+API_TIMEOUT_MS=600000             # 超时 10 分钟
+```
+
+### 13.4 常见用法
+
+```bash
+# 交互式会话（最常用）
+docker compose run --rm claude
+
+# 单次问答
+docker compose run --rm claude claude -p "解释什么是单细胞RNA测序"
+
+# 挂载自定义项目目录
+docker compose run --rm -v /your/project:/workspace claude
+
+# 指定模型
+docker compose run --rm -e CLAUDE_MODEL=MiniMax-M3 claude
+
+# 构建镜像
+docker compose build
+```
+
+### 13.5 Docker 架构说明
+
+```
+┌─────────────────────────────────────┐
+│         Docker Container            │
+│                                     │
+│  node:lts-slim (基础镜像)          │
+│  ├── Node.js LTS (预装)            │
+│  ├── Claude Code (npm 全局安装)    │
+│  ├── entrypoint.sh (自动配置)      │
+│  └── 非 root 用户 claude           │
+│                                     │
+│  卷挂载：                           │
+│  ├── .env → 环境变量（API Key）    │
+│  ├── .claude/ → 配置持久化         │
+│  └── ./ → /workspace（项目目录）   │
+└─────────────────────────────────────┘
+```
+
+### 13.6 Docker 版本 vs 本地安装对比
+
+| 维度 | Docker 版本 | 本地安装 |
+|------|:--:|:--:|
+| 安装依赖 | 只需 Docker | nvm + Node.js + npm |
+| 配置难度 | ⭐ 极简 | ⭐⭐ 中等 |
+| 环境隔离 | ✅ 完全隔离 | ❌ 与系统共享 |
+| 磁盘占用 | ~500MB | ~200MB |
+| 跨平台 | ✅ 任何有 Docker 的系统 | Linux/macOS/WSL |
+| 配置文件持久化 | ✅ 通过卷挂载 | ✅ 本地文件 |
+| 适合人群 | 小白、临时使用 | 长期日常使用 |
+
+### 13.7 Docker 故障排查
+
+| 问题 | 解决 |
+|------|------|
+| `docker: command not found` | 安装 Docker Desktop |
+| `Cannot connect to Docker daemon` | 启动 Docker Desktop |
+| `401 Unauthorized` | 检查 .env 中的 API Key 和 AUTH_TOKEN vs API_KEY |
+| `Container exits immediately` | 确保 `stdin_open: true` 和 `tty: true` |
+| 配置文件不持久化 | 检查 docker-compose.yml 中的 volumes 配置
+
+编辑 `~/.claude/settings.json` 中的 `ANTHROPIC_BASE_URL` 和认证字段。
+
+---
+
 ## 环境变量速查
 
 | 变量 | 说明 | 示例值 | 备选字段名 |
@@ -525,6 +638,7 @@ nvm use --lts
 - npm ≥ 9
 - 网络可访问 MiniMax API (`https://api.minimax.chat` 或 `https://api.minimaxi.com`)
 - WSL2 / Linux / macOS（Windows 需通过 WSL 使用）
+- Docker（可选，用于 Docker 部署方式）
 
 ---
 
@@ -532,5 +646,6 @@ nvm use --lts
 
 | 版本 | 日期 | 变更 |
 |------|------|------|
+| v1.2 | 2025-07-07 | 新增 Docker 一键部署（Dockerfile + docker-compose + .env.example）、Docker vs 本地安装对比、Docker 故障排查 |
 | v1.1 | 2025-07-06 | 修复：添加 MiniMax API 变体说明（ANTHROPIC_AUTH_TOKEN / api.minimaxi.com）、CLAUDE.md 重要性强调、WispTerm Skill 注册说明 |
 | v1.0 | 2025-07-04 | 初始版本：12 步完整部署流程、参数详解、FAQ |
