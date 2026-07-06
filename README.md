@@ -1,9 +1,21 @@
 # Claude Code 安装配置完全指南
 
 > 🚀 面向零基础组学分析小白的 Claude Code 部署指南  
-> 📦 适用于 WSL/Linux/macOS | 支持 MiniMax / Anthropic API
+> 📦 适用于 WSL/Linux/macOS/Docker | 支持 MiniMax / Anthropic API
 
-## ⚡ 30 秒速查
+## 🐳 Docker 一键运行（最快方式）
+
+```bash
+git clone https://github.com/ZhaoLabs-SJTU/Claude-test.git
+cd Claude-test
+cp .env.example .env
+nano .env  # 填入你的 MiniMax API Key
+docker compose run --rm claude
+```
+
+> 详细说明见 [第十四章 Docker 部署](完全指南.md#第十四章-docker-部署免安装一键运行)
+
+## ⚡ 30 秒速查（本地安装）
 
 ```bash
 # 1. 环境
@@ -39,6 +51,9 @@ claude -p "回复OK"
 
 | 文件 | 说明 |
 |------|------|
+| [Dockerfile](Dockerfile) | Docker 镜像构建文件 |
+| [docker-compose.yml](docker-compose.yml) | Docker Compose 一键启动 |
+| [.env.example](.env.example) | Docker 环境变量模板 |
 | [SKILL.md](SKILL.md) | WispTerm AI 技能定义 |
 | [完全指南.md](完全指南.md) | 13 章完整教程，每步命令可复制 |
 | README.md (本文件) | 快速参考 |
@@ -74,4 +89,4 @@ claude -p "回复OK"
 
 ---
 
-📅 最后更新：2025-07-06 | 🔗 https://github.com/ZhaoLabs-SJTU/Claude-test
+📅 最后更新：2025-07-07 | 🔗 https://github.com/ZhaoLabs-SJTU/Claude-test
