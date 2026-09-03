@@ -47,18 +47,18 @@ claude -p "回复OK"
 
 > ⚠️ **MiniMax API 注意**：不同环境可能使用 `ANTHROPIC_AUTH_TOKEN` 代替 `ANTHROPIC_API_KEY`，API 地址也可能为 `api.minimaxi.com`。详见 [完全指南.md](完全指南.md) 第四章。
 
-## 📖 文档结构
+## 📖 文档导航
 
-| 文件 | 说明 |
-|------|------|
-| [Dockerfile](Dockerfile) | Docker 镜像构建文件 |
-| [docker-compose.yml](docker-compose.yml) | Docker Compose 一键启动 |
-| [.env.example](.env.example) | Docker 环境变量模板 |
-| [SKILL.md](SKILL.md) | 终端 AI Agent 技能定义 |
-| [完全指南.md](完全指南.md) | 13 章完整教程，每步命令可复制 |
-| README.md (本文件) | 快速参考 |
-| [Claude_Code_从零到精通_完全指南.docx](Claude_Code_从零到精通_完全指南.docx) | Word 文档，可打印版 |
-| [Claude_Code_从零到精通_完全指南.pptx](Claude_Code_从零到精通_完全指南.pptx) | PPT 幻灯片 |
+| 文档 | 适用人群 | 预计时间 |
+|------|---------|:--:|
+| **[🌟 新手完全指南](完全指南.md)** | 零基础小白（从安装到组学实战） | 30 分钟阅读 |
+| **[SKILL.md](SKILL.md)** | AI 助手调用 | — |
+| **[Claude_Code_从零到精通_完全指南.docx](Claude_Code_从零到精通_完全指南.docx)** | Word 可打印版 | — |
+| **[Claude_Code_从零到精通_完全指南.pptx](Claude_Code_从零到精通_完全指南.pptx)** | PPT 幻灯片 | — |
+| **[Dockerfile](Dockerfile)** | Docker 镜像构建 | — |
+| **[docker-compose.yml](docker-compose.yml)** | Docker 一键启动 | — |
+
+> ⚠️ **如果你不确定该看哪个** → 直接打开 **[新手完全指南](完全指南.md)**，从第一章开始！
 
 ## 🚨 CLAUDE.md 重要性
 
