@@ -3,6 +3,8 @@
 > 🚀 面向零基础组学分析小白的 Claude Code 部署指南  
 > 📦 适用于 WSL/Linux/macOS/Docker | 支持 MiniMax / Anthropic API
 
+[![CI](https://github.com/ZhaoLabs-SJTU/Claude-test/actions/workflows/ci.yml/badge.svg)](https://github.com/ZhaoLabs-SJTU/Claude-test/actions/workflows/ci.yml)
+
 ## 🐳 Docker 一键运行（最快方式）
 
 ```bash
